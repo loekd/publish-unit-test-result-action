@@ -128,7 +128,8 @@ class TestPublisher(unittest.TestCase):
             ignore_runs=False,
             check_run_annotation=check_run_annotation,
             seconds_between_github_reads=1.5,
-            seconds_between_github_writes=2.5
+            seconds_between_github_writes=2.5,
+            secondary_rate_limit_wait_seconds=60
         )
 
     stats = UnitTestRunResults(

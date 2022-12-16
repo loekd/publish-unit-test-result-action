@@ -23,7 +23,6 @@ from publish.github_action import GithubAction
 from publish.junit import parse_junit_xml_files, process_junit_xml_elems
 from publish.progress import progress_logger
 from publish.publisher import Publisher, Settings
-from publish.retry import GitHubRetry
 from publish.unittestresults import get_test_results, get_stats, ParsedUnitTestResults, ParsedUnitTestResultsWithCommit, \
     ParseError
 
@@ -40,12 +39,12 @@ def get_conclusion(parsed: ParsedUnitTestResults, fail_on_failures, fail_on_erro
     return 'success'
 
 
-def get_github(token: str, url: str, retries: int, backoff_factor: float, gha: GithubAction) -> github.Github:
-    retry = GitHubRetry(gha=gha,
-                        total=retries,
-                        backoff_factor=backoff_factor,
-                        allowed_methods=Retry.DEFAULT_ALLOWED_METHODS.union({'GET', 'POST'}),
-                        status_forcelist=list(range(500, 600)))
+def get_github(token: str, url: str, retries: int, backoff_factor: float, secondaryRateWait: int) -> github.Github:
+    retry = github.GithubRetry(total=retries,
+                               backoff_factor=backoff_factor,
+                               secondaryRateWait=secondaryRateWait,
+                               allowed_methods=Retry.DEFAULT_ALLOWED_METHODS.union({'GET', 'POST'}),
+                               status_forcelist=list(range(500, 600)))
     return github.Github(login_or_token=token, base_url=url, per_page=100, retry=retry)
 
 
@@ -174,7 +173,13 @@ def main(settings: Settings, gha: GithubAction) -> None:
 
     # publish the delta stats
     backoff_factor = max(settings.seconds_between_github_reads, settings.seconds_between_github_writes)
-    gh = get_github(token=settings.token, url=settings.api_url, retries=settings.api_retries, backoff_factor=backoff_factor, gha=gha)
+    gh = get_github(
+        token=settings.token,
+        url=settings.api_url,
+        retries=settings.api_retries,
+        backoff_factor=backoff_factor,
+        secondaryRateWait=settings.secondary_rate_limit_wait_seconds
+    )
     gh._Github__requester._Requester__requestRaw = throttle_gh_request_raw(
         settings.seconds_between_github_reads,
         settings.seconds_between_github_writes,
@@ -413,7 +418,8 @@ def get_settings(options: dict, gha: Optional[GithubAction] = None) -> Settings:
         ignore_runs=get_bool_var('IGNORE_RUNS', options, default=False),
         check_run_annotation=annotations,
         seconds_between_github_reads=float(seconds_between_github_reads),
-        seconds_between_github_writes=float(seconds_between_github_writes)
+        seconds_between_github_writes=float(seconds_between_github_writes),
+        secondary_rate_limit_wait_seconds=60
     )
 
     check_var(settings.token, 'GITHUB_TOKEN', 'GitHub token')
