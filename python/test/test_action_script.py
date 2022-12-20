@@ -826,25 +826,14 @@ class Test(unittest.TestCase):
         self.assertEqual([], gha.method_calls)
 
         self.assertEqual(67, actual.files)
-        if Version(sys.version.split(' ')[0]) >= Version('3.10.0') and sys.platform.startswith('darwin'):
-            # on macOS and Python 3.10 we see one particular error
-            self.assertEqual(8, len(actual.errors))
-            self.assertEqual(356, actual.suites)
-            self.assertEqual(1925, actual.suite_tests)
-            self.assertEqual(106, actual.suite_skipped)
-            self.assertEqual(224, actual.suite_failures)
-            self.assertEqual(8, actual.suite_errors)
-            self.assertEqual(3966, actual.suite_time)
-            self.assertEqual(1913, len(actual.cases))
-        else:
-            self.assertEqual(6, len(actual.errors))
-            self.assertEqual(358, actual.suites)
-            self.assertEqual(1929, actual.suite_tests)
-            self.assertEqual(106, actual.suite_skipped)
-            self.assertEqual(226, actual.suite_failures)
-            self.assertEqual(8, actual.suite_errors)
-            self.assertEqual(3966, actual.suite_time)
-            self.assertEqual(1917, len(actual.cases))
+        self.assertEqual(6, len(actual.errors))
+        self.assertEqual(358, actual.suites)
+        self.assertEqual(1929, actual.suite_tests)
+        self.assertEqual(106, actual.suite_skipped)
+        self.assertEqual(226, actual.suite_failures)
+        self.assertEqual(8, actual.suite_errors)
+        self.assertEqual(3966, actual.suite_time)
+        self.assertEqual(1917, len(actual.cases))
         self.assertEqual('commit', actual.commit)
 
         with io.StringIO() as string:
@@ -865,13 +854,6 @@ class Test(unittest.TestCase):
                 "::error::lxml.etree.XMLSyntaxError: attributes construct error, line 5, column 109",
                 "::error file=NUnit-issue47367.xml::Error processing result file: attributes construct error, line 5, column 109 (NUnit-issue47367.xml, line 5)"
             ]
-            if Version(sys.version.split(' ')[0]) >= Version('3.10.0') and sys.platform.startswith('darwin'):
-                expected.extend([
-                    '::error::lxml.etree.XMLSyntaxError: Failure to process entity xxe, line 17, column 51',
-                    '::error file=NUnit-sec1752-file.xml::Error processing result file: Failure to process entity xxe, line 17, column 51 (NUnit-sec1752-file.xml, line 17)',
-                    '::error::lxml.etree.XMLSyntaxError: Failure to process entity xxe, line 17, column 51',
-                    '::error file=NUnit-sec1752-https.xml::Error processing result file: Failure to process entity xxe, line 17, column 51 (NUnit-sec1752-https.xml, line 17)'
-                ])
             self.assertEqual(
                 sorted(expected),
                 sorted([re.sub(r'file=.*[/\\]', 'file=', re.sub(r'[(]file:.*/', '(', line))
