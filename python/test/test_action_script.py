@@ -893,11 +893,11 @@ class Test(unittest.TestCase):
                 print(call.args[0])
 
             self.assertEqual(5, len(l.info.call_args_list))
-            self.assertTrue(any([call.args[0].startswith(f'Reading JUnit files {settings.junit_files_glob} (29 files, ') for call in l.info.call_args_list]))
+            self.assertTrue(any([call.args[0].startswith(f'Reading JUnit files {settings.junit_files_glob} (37 files, ') for call in l.info.call_args_list]))
             self.assertTrue(any([call.args[0].startswith(f'Reading NUnit files {settings.nunit_files_glob} (24 files, ') for call in l.info.call_args_list]))
             self.assertTrue(any([call.args[0].startswith(f'Reading XUnit files {settings.xunit_files_glob} (8 files, ') for call in l.info.call_args_list]))
             self.assertTrue(any([call.args[0].startswith(f'Reading TRX files {settings.trx_files_glob} (9 files, ') for call in l.info.call_args_list]))
-            self.assertTrue(any([call.args[0].startswith(f'Finished reading 70 files in ') for call in l.info.call_args_list]))
+            self.assertTrue(any([call.args[0].startswith(f'Finished reading 78 files in ') for call in l.info.call_args_list]))
 
             self.assertEqual(4, len(l.debug.call_args_list))
             self.assertTrue(any([call.args[0].startswith('reading JUnit files [') for call in l.debug.call_args_list]))
@@ -907,28 +907,28 @@ class Test(unittest.TestCase):
 
         self.assertEqual([], gha.method_calls)
 
-        self.assertEqual(70, actual.files)
+        self.assertEqual(78, actual.files)
         if Version(sys.version.split(' ')[0]) >= Version('3.10.0') and sys.platform.startswith('darwin'):
             # on macOS and Python 3.10 and above we see one particular error
             self.assertEqual(8, len(actual.errors))
-            self.assertEqual(359, actual.suites)
-            self.assertEqual(2037, actual.suite_tests)
+            self.assertEqual(367, actual.suites)
+            self.assertEqual(2073, actual.suite_tests)
             self.assertEqual(106, actual.suite_skipped)
             self.assertEqual(224, actual.suite_failures)
             self.assertEqual(9, actual.suite_errors)
             self.assertEqual(3967, actual.suite_time)
             self.assertEqual(0, len(actual.suite_details))
-            self.assertEqual(2025, len(actual.cases))
+            self.assertEqual(2061, len(actual.cases))
         else:
             self.assertEqual(6, len(actual.errors))
-            self.assertEqual(361, actual.suites)
-            self.assertEqual(2041, actual.suite_tests)
+            self.assertEqual(369, actual.suites)
+            self.assertEqual(2077, actual.suite_tests)
             self.assertEqual(106, actual.suite_skipped)
             self.assertEqual(226, actual.suite_failures)
             self.assertEqual(9, actual.suite_errors)
             self.assertEqual(3967, actual.suite_time)
             self.assertEqual(0, len(actual.suite_details))
-            self.assertEqual(2029, len(actual.cases))
+            self.assertEqual(2065, len(actual.cases))
         self.assertEqual('commit', actual.commit)
 
         with io.StringIO() as string:
@@ -981,9 +981,9 @@ class Test(unittest.TestCase):
 
                 if Version(sys.version.split(' ')[0]) >= Version('3.10.0') and sys.platform.startswith('darwin'):
                     # on macOS and Python 3.10 and above we see one particular error
-                    self.assertEqual(359, len(actual.suite_details))
+                    self.assertEqual(367, len(actual.suite_details))
                 else:
-                    self.assertEqual(361, len(actual.suite_details))
+                    self.assertEqual(369, len(actual.suite_details))
 
     def test_parse_files_no_matches(self):
         gha = mock.MagicMock()
@@ -1103,16 +1103,16 @@ class Test(unittest.TestCase):
 
                 # Publisher.publish is expected to have been called with these arguments
                 results, cases, conclusion = m.call_args_list[0].args
-                self.assertEqual(70, results.files)
+                self.assertEqual(78, results.files)
                 if Version(sys.version.split(' ')[0]) >= Version('3.10.0') and sys.platform.startswith('darwin'):
                     # on macOS and Python 3.10 and above we see one particular error
-                    self.assertEqual(359, results.suites)
-                    self.assertEqual(359, len(results.suite_details))
-                    self.assertEqual(1786, len(cases))
+                    self.assertEqual(367, results.suites)
+                    self.assertEqual(367, len(results.suite_details))
+                    self.assertEqual(1822, len(cases))
                 else:
-                    self.assertEqual(361, results.suites)
-                    self.assertEqual(361, len(results.suite_details))
-                    self.assertEqual(1786, len(cases))
+                    self.assertEqual(369, results.suites)
+                    self.assertEqual(369, len(results.suite_details))
+                    self.assertEqual(1822, len(cases))
                 self.assertEqual('failure', conclusion)
 
     def test_main_fork_pr_check(self):
